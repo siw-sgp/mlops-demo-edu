@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 
 # Legacy engine workloads would need to:
 #  - import cdsw here as cml library does not exist in engines
-#  - change metrics to cdsw on lines 34 and 39 and we are changing something again and again
+#  - change metrics to cdsw on lines 34 and 39 and we are changing something to original
 import cml.metrics_v1 as metrics
 
 iris = datasets.load_iris()
