@@ -1,3 +1,3 @@
 # Setup
 # -----
-%pip install -r requirements.txt
+%pip install -r ~/end-to-end-devops-demo/requirements.txt
