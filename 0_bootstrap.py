@@ -1,5 +1,2 @@
-# Setup
-# -----
-%git fetch --all
-%git reset --hard origin/main
-%pip install -r ~/end-to-end-devops-demo/requirements.txt
+import os
+os.system("sh fetch_files_in_repo.sh")
