@@ -23,7 +23,7 @@ deploy-to-prod-cluster:
     - apk add --update curl && rm -rf /var/cache/apk/*
     - apk add jq
   script:
-    - 'echo $CDSW_DOMAIN/api/v2/projects?search_filter=%7B%22name%22%3A%22$PROJECT_NAME%22%7D&sort=%2Bname'
+    - 'echo "$CDSW_DOMAIN/api/v2/projects?search_filter=%7B%22name%22%3A%22$PROJECT_NAME%22%7D&sort=%2Bname"'
     - 'echo $API_KEY'
     - 'curl -X GET "$CDSW_DOMAIN/api/v2/projects?search_filter=%7B%22name%22%3A%22$PROJECT_NAME%22%7D&sort=%2Bname" -H "accept: application/json" -H "Authorization: Bearer $API_KEY" | jq'
     - 'PROJECT_ID=$(curl -X GET "$CDSW_DOMAIN/api/v2/projects?search_filter=%7B%22name%22%3A%22$PROJECT_NAME%22%7D&sort=%2Bname" -H "accept: application/json" -H "Authorization: Bearer $API_KEY" | jq -r ".projects|.[0]|.id" )'
