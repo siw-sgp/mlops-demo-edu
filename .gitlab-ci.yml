@@ -16,6 +16,24 @@
 # This specific template is located at:
 # https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Getting-Started.gitlab-ci.yml
 
+# This file is a template, and might need editing before it works on your project.
+# This is a sample GitLab CI/CD configuration file that should run without any modifications.
+# It demonstrates a basic 3 stage CI/CD pipeline. Instead of real tests or scripts,
+# it uses echo commands to simulate the pipeline execution.
+#
+# A pipeline is composed of independent jobs that run scripts, grouped into stages.
+# Stages run in sequential order, but jobs within stages run in parallel.
+#
+# For more information, see: https://docs.gitlab.com/ee/ci/yaml/index.html#stages
+#
+# You can copy and paste this template into a new `.gitlab-ci.yml` file.
+# You should not add this template to an existing `.gitlab-ci.yml` file by using the `include:` keyword.
+#
+# To contribute improvements to CI/CD templates, please follow the Development guide at:
+# https://docs.gitlab.com/ee/development/cicd/templates.html
+# This specific template is located at:
+# https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Getting-Started.gitlab-ci.yml
+
 deploy-to-prod-cluster:
   stage: deploy
   image: docker:stable
@@ -23,13 +41,16 @@ deploy-to-prod-cluster:
     - apk add --update curl && rm -rf /var/cache/apk/*
     - apk add jq
   script:
-    - 'PROJECT_ID=$(curl -X GET "$CDSW_DOMAIN/api/v2/projects?search_filter=%7B%22name%22%3A%22$PROJECT_NAME%22%7D&sort=%2Bname" -H "accept: application/json" -H "Authorization: Bearer $API_KEY" | jq -r ".projects|.[0]|.id" )'
+    - 'echo "$CDSW_DOMAIN/api/v2/projects?search_filter=%7B%22name%22%3A%22$PROJECT_NAME%22%7D&sort=%2Bname"'
+    - 'echo $API_KEY'
+    - 'curl -X GET "$CDSW_DOMAIN/api/v2/projects?search_filter=%7B%22name%22%3A%22$PROJ_NAME%22%7D" -H "accept: application/json" -H "Authorization: Bearer $API_KEY" | jq'
+    - 'PROJECT_ID=$(curl -X GET "$CDSW_DOMAIN/api/v2/projects?search_filter=%7B%22name%22%3A%22$PROJ_NAME%22%7D" -H "accept: application/json" -H "Authorization: Bearer $API_KEY" | jq -r ".projects|.[0]|.id")'
     - 'echo $PROJECT_ID'
     - 'pwd'
-    - 'ls -l'
+#    - 'ls -l'
     - 'RUN_TIME="docker.repository.cloudera.com/cloudera/cdsw/ml-runtime-workbench-python3.7-standard:2022.04.1-b6"'
     - 'curl -X POST "$CDSW_DOMAIN/api/v2/projects/$PROJECT_ID/jobs" -H "accept: application/json" -H "Authorization: Bearer $API_KEY" -H "Content-Type: application/json" -d "{ \"arguments\": \"\", \"attachments\": [ \"\" ], \"cpu\": 2, \"environment\": { \"additionalProp1\": \"\", \"additionalProp2\": \"string\", \"additionalProp3\": \"string\" }, \"kernel\": \"\", \"kill_on_timeout\": true, \"memory\": 4, \"name\": \"bootstrap\", \"nvidia_gpu\": 0, \"parent_job_id\": \"\", \"project_id\": \"string\", \"recipients\": [ { \"email\": \"\", \"notify_on_failure\": true, \"notify_on_stop\": true, \"notify_on_success\": true, \"notify_on_timeout\": true } ], \"runtime_addon_identifiers\": [ \"\" ], \"runtime_identifier\": \"$RUN_TIME\", \"schedule\": \"\", \"script\": \"0_bootstrap.py\", \"timeout\": 0}" | jq'
-    - 'JOB_ID=$(curl -X POST "$CDSW_DOMAIN/api/v2/projects/$PROJECT_ID/jobs" -H "accept: application/json" -H "Authorization: Bearer $API_KEY" -H "Content-Type: application/json" -d "{ \"arguments\": \"\", \"attachments\": [ \"\" ], \"cpu\": 2, \"environment\": { \"additionalProp1\": \"\", \"additionalProp2\": \"string\", \"additionalProp3\": \"string\" }, \"kernel\": \"\", \"kill_on_timeout\": true, \"memory\": 4, \"name\": \"bootstrap\", \"nvidia_gpu\": 0, \"parent_job_id\": \"\", \"project_id\": \"string\", \"recipients\": [ { \"email\": \"\", \"notify_on_failure\": true, \"notify_on_stop\": true, \"notify_on_success\": true, \"notify_on_timeout\": true } ], \"runtime_addon_identifiers\": [ \"\" ], \"runtime_identifier\": \"$RUN_TIME\", \"schedule\": \"\", \"script\": \"end-to-end-devops-demo/0_bootstrap.py\", \"timeout\": 0}" | jq -r ".id")'
+    - 'JOB_ID=$(curl -X POST "$CDSW_DOMAIN/api/v2/projects/$PROJECT_ID/jobs" -H "accept: application/json" -H "Authorization: Bearer $API_KEY" -H "Content-Type: application/json" -d "{ \"arguments\": \"\", \"attachments\": [ \"\" ], \"cpu\": 2, \"environment\": { \"additionalProp1\": \"\", \"additionalProp2\": \"string\", \"additionalProp3\": \"string\" }, \"kernel\": \"\", \"kill_on_timeout\": true, \"memory\": 4, \"name\": \"bootstrap\", \"nvidia_gpu\": 0, \"parent_job_id\": \"\", \"project_id\": \"string\", \"recipients\": [ { \"email\": \"\", \"notify_on_failure\": true, \"notify_on_stop\": true, \"notify_on_success\": true, \"notify_on_timeout\": true } ], \"runtime_addon_identifiers\": [ \"\" ], \"runtime_identifier\": \"$RUN_TIME\", \"schedule\": \"\", \"script\": \"0_bootstrap.py\", \"timeout\": 0}" | jq -r ".id")'
     - 'echo $JOB_ID'
-    - 'CHILD_JOB_ID=$(curl -X POST "$CDSW_DOMAIN/api/v2/projects/$PROJECT_ID/jobs" -H "accept: application/json" -H "Authorization: Bearer $API_KEY" -H "Content-Type: application/json" -d "{ \"arguments\": \"\", \"attachments\": [ \"\" ], \"cpu\": 2, \"environment\": { \"additionalProp1\": \"\", \"additionalProp2\": \"string\", \"additionalProp3\": \"string\" }, \"kernel\": \"\", \"kill_on_timeout\": true, \"memory\": 4, \"name\": \"train_model\", \"nvidia_gpu\": 0, \"parent_job_id\": \"$JOB_ID\", \"project_id\": \"string\", \"recipients\": [ { \"email\": \"\", \"notify_on_failure\": true, \"notify_on_stop\": true, \"notify_on_success\": true, \"notify_on_timeout\": true } ], \"runtime_addon_identifiers\": [ \"\" ], \"runtime_identifier\": \"$RUN_TIME\", \"schedule\": \"\", \"script\": \"end-to-end-devops-demo/fit.py\", \"timeout\": 0}" | jq -r ".id")'
+    - 'CHILD_JOB_ID=$(curl -X POST "$CDSW_DOMAIN/api/v2/projects/$PROJECT_ID/jobs" -H "accept: application/json" -H "Authorization: Bearer $API_KEY" -H "Content-Type: application/json" -d "{ \"arguments\": \"\", \"attachments\": [ \"\" ], \"cpu\": 2, \"environment\": { \"additionalProp1\": \"\", \"additionalProp2\": \"string\", \"additionalProp3\": \"string\" }, \"kernel\": \"\", \"kill_on_timeout\": true, \"memory\": 4, \"name\": \"train_model\", \"nvidia_gpu\": 0, \"parent_job_id\": \"$JOB_ID\", \"project_id\": \"string\", \"recipients\": [ { \"email\": \"\", \"notify_on_failure\": true, \"notify_on_stop\": true, \"notify_on_success\": true, \"notify_on_timeout\": true } ], \"runtime_addon_identifiers\": [ \"\" ], \"runtime_identifier\": \"$RUN_TIME\", \"schedule\": \"\", \"script\": \"fit.py\", \"timeout\": 0}" | jq -r ".id")'
     - 'curl -X POST "$CDSW_DOMAIN/api/v2/projects/$PROJECT_ID/jobs/$JOB_ID/runs" -H "accept: application/json" -H "Authorization: Bearer $API_KEY" -H "Content-Type: application/json" -d "{ \"arguments\": \"string\", \"environment\": { \"additionalProp1\": \"string\", \"additionalProp2\": \"string\", \"additionalProp3\": \"string\" }, \"job_id\": \"string\", \"project_id\": \"string\"}" | jq'
