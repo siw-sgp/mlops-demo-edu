@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 import cml.metrics_v1 as metrics 
 
 iris = datasets.load_iris()
-test_size = 20
+test_size = 21
 
 # Train
 iris_x = iris.data[test_size:, 2].reshape(-1, 1) # petal length
