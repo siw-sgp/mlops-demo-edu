@@ -35,7 +35,8 @@ jobs:
           echo "Job ID: $JOB_ID"
           echo "JOB_ID=$JOB_ID" >> $GITHUB_ENV
           curl -X POST "$CDSW_DOMAIN/api/v2/projects/$PROJECT_ID/jobs/$JOB_ID/runs" -H "accept: application/json" -H "Authorization: Bearer $API_KEY" -H "Content-Type: application/json"
-
+      - name: Wait for 30 Seconds
+        run: sleep 30
       - name: Create and Execute Fit Model Job
         env:
           API_KEY: ${{ secrets.CML_API_KEY }}
