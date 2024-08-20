@@ -35,22 +35,25 @@ jobs:
           echo "Job ID: $JOB_ID"
           echo "JOB_ID=$JOB_ID" >> $GITHUB_ENV
           curl -X POST "$CDSW_DOMAIN/api/v2/projects/$PROJECT_ID/jobs/$JOB_ID/runs" -H "accept: application/json" -H "Authorization: Bearer $API_KEY" -H "Content-Type: application/json"
+
       - name: Wait for 30 Seconds
         run: sleep 30
-      - name: Create and Execute Fit Model Job
+
+      - name: Create and Execute Fit Model Job (Run Experiment)
         env:
           API_KEY: ${{ secrets.CML_API_KEY }}
           CDSW_DOMAIN: "https://ml-0d9d45c4-174.sanket-5.kfjr-x0dh.cloudera.site"
           PROJECT_ID: ${{ env.PROJECT_ID }}
-          JOB_ID: ${{ env.JOB_ID }}
           RUN_TIME: "docker.repository.cloudera.com/cloudera/cdsw/ml-runtime-pbj-workbench-python3.9-standard:2024.02.1-b4"
         run: |
-          CHILD_JOB_ID=$(curl -X POST "$CDSW_DOMAIN/api/v2/projects/$PROJECT_ID/jobs" -H "accept: application/json" -H "Authorization: Bearer $API_KEY" -H "Content-Type: application/json" -d "{ \"cpu\": 2, \"memory\": 4, \"name\": \"train_model\", \"runtime_identifier\": \"$RUN_TIME\", \"script\": \"fit.py\", \"parent_job_id\": \"$JOB_ID\"}" | jq -r ".id")
-          echo "Child Job ID: $CHILD_JOB_ID"
-          curl -X POST "$CDSW_DOMAIN/api/v2/projects/$PROJECT_ID/jobs/$CHILD_JOB_ID/runs" -H "accept: application/json" -H "Authorization: Bearer $API_KEY" -H "Content-Type: application/json"
+          EXPERIMENT_JOB_ID=$(curl -X POST "$CDSW_DOMAIN/api/v2/projects/$PROJECT_ID/jobs" -H "accept: application/json" -H "Authorization: Bearer $API_KEY" -H "Content-Type: application/json" -d "{ \"cpu\": 2, \"memory\": 4, \"name\": \"train_experiment\", \"runtime_identifier\": \"$RUN_TIME\", \"script\": \"fit.py\"}" | jq -r ".id")
+          echo "Experiment Job ID: $EXPERIMENT_JOB_ID"
+          curl -X POST "$CDSW_DOMAIN/api/v2/projects/$PROJECT_ID/jobs/$EXPERIMENT_JOB_ID/runs" -H "accept: application/json" -H "Authorization: Bearer $API_KEY" -H "Content-Type: application/json"
 
+      - name: Wait for 10 Seconds
+        run: sleep 10
 
-    - name: Create Model with predict.py
+      - name: Create Model with predict.py
         env:
           API_KEY: ${{ secrets.CML_API_KEY }}
           CDSW_DOMAIN: "https://ml-0d9d45c4-174.sanket-5.kfjr-x0dh.cloudera.site"
