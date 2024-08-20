@@ -48,3 +48,40 @@ jobs:
           CHILD_JOB_ID=$(curl -X POST "$CDSW_DOMAIN/api/v2/projects/$PROJECT_ID/jobs" -H "accept: application/json" -H "Authorization: Bearer $API_KEY" -H "Content-Type: application/json" -d "{ \"cpu\": 2, \"memory\": 4, \"name\": \"train_model\", \"runtime_identifier\": \"$RUN_TIME\", \"script\": \"fit.py\", \"parent_job_id\": \"$JOB_ID\"}" | jq -r ".id")
           echo "Child Job ID: $CHILD_JOB_ID"
           curl -X POST "$CDSW_DOMAIN/api/v2/projects/$PROJECT_ID/jobs/$CHILD_JOB_ID/runs" -H "accept: application/json" -H "Authorization: Bearer $API_KEY" -H "Content-Type: application/json"
+
+
+
+      - name: Wait for 60 Seconds
+        run: sleep 60
+
+      - name: Create Model with predict.py
+        env:
+          API_KEY: ${{ secrets.CML_API_KEY }}
+          CDSW_DOMAIN: "https://ml-0d9d45c4-174.sanket-5.kfjr-x0dh.cloudera.site"
+          PROJECT_ID: ${{ env.PROJECT_ID }}
+        run: |
+          MODEL_ID=$(curl -X POST "$CDSW_DOMAIN/api/v2/projects/$PROJECT_ID/models" -H "accept: application/json" -H "Authorization: Bearer $API_KEY" -H "Content-Type: application/json" -d "{ \"name\": \"trained_model\", \"description\": \"Model created from experiment\", \"script\": \"predict.py\" }" | jq -r ".id")
+          echo "Model ID: $MODEL_ID"
+          echo "MODEL_ID=$MODEL_ID" >> $GITHUB_ENV
+
+      - name: Build Model
+        env:
+          API_KEY: ${{ secrets.CML_API_KEY }}
+          CDSW_DOMAIN: "https://ml-0d9d45c4-174.sanket-5.kfjr-x0dh.cloudera.site"
+          PROJECT_ID: ${{ env.PROJECT_ID }}
+          MODEL_ID: ${{ env.MODEL_ID }}
+        run: |
+          BUILD_ID=$(curl -X POST "$CDSW_DOMAIN/api/v2/projects/$PROJECT_ID/models/$MODEL_ID/builds" -H "accept: application/json" -H "Authorization: Bearer $API_KEY" -H "Content-Type: application/json" -d "{}" | jq -r ".id")
+          echo "Build ID: $BUILD_ID"
+          echo "BUILD_ID=$BUILD_ID" >> $GITHUB_ENV
+
+      - name: Deploy Model
+        env:
+          API_KEY: ${{ secrets.CML_API_KEY }}
+          CDSW_DOMAIN: "https://ml-0d9d45c4-174.sanket-5.kfjr-x0dh.cloudera.site"
+          PROJECT_ID: ${{ env.PROJECT_ID }}
+          MODEL_ID: ${{ env.MODEL_ID }}
+          BUILD_ID: ${{ env.BUILD_ID }}
+        run: |
+          curl -X POST "$CDSW_DOMAIN/api/v2/projects/$PROJECT_ID/models/$MODEL_ID/builds/$BUILD_ID/deployments" -H "accept: application/json" -H "Authorization: Bearer $API_KEY" -H "Content-Type: application/json" -d "{}"
+
