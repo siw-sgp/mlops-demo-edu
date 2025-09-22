@@ -21,7 +21,7 @@ jobs:
           PROJ_NAME: "cicd-siw"
         run: |
           PROJECT_ID=$(curl -X GET "$CDSW_DOMAIN/api/v2/projects?search_filter=%7B%22name%22%3A%22$PROJ_NAME%22%7D" -H "accept: application/json" -H "Authorization: Bearer $API_KEY" | jq -r ".projects|.[0]|.id")
-          echo "Project ID: $PROJECT_ID"
+          echo "Project ID1: $PROJECT_ID"
           echo "PROJECT_ID=$PROJECT_ID" >> $GITHUB_ENV
 
       - name: Create Bootstrap Job
