@@ -2,6 +2,7 @@
 # classic iris flower dataset to predict petal
 # width from petal length. Write the fitted
 # model to the file model.pkl
+# new run
 
 from sklearn import datasets, linear_model
 from sklearn.metrics import mean_squared_error, r2_score
